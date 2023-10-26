@@ -1,8 +1,3 @@
-import { useState } from 'react'
-import { useEffect } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-
 // CRUD - Create Read Update Delete
 
 // 1. Добовление новой задачи (Create)
@@ -10,18 +5,24 @@ import viteLogo from '/vite.svg'
 // 3. Редактирование задачи (Update)
 // 4. Удаление задачи (Delete)
 
-const mockTodos = [ // 1 Создаем изначальную структуру из которой будем отталкиваться
-  {
-    id: 1,
-    title: 'delectus aut autem',
-    completed: false
-  },
-  {
-    id: 2,
-    title: 'delectus aut autem',
-    completed: false
-  }
-];
+import { 
+  useState,
+  useEffect 
+} from 'react'
+import { getTodos } from './api/todo';
+
+// const mockTodos = [ // 1 Создаем изначальную структуру из которой будем отталкиваться
+//   {
+//     id: 1,
+//     title: 'delectus aut autem',
+//     completed: false
+//   },
+//   {
+//     id: 2,
+//     title: 'delectus aut autem',
+//     completed: false
+//   }
+// ];
 
 const App = () => {
   const [todos, setTodos] = useState(null); // 2 передаем mockTodos в useState чтобы с ним работать
@@ -32,8 +33,19 @@ const App = () => {
   useEffect(() => {
     setIsTodosLoadingError(false)
     setIsTodosLoading(true)
-    setTodos(mockTodos)
-    setIsTodosLoading(false)
+
+    getTodos()
+    .then(todos => { // Определяем что должно приходить в данном случае todos
+      setIsTodosLoading(false)
+      setTodos(todos);
+    })
+
+    .catch(() => {
+      setIsTodosLoadingError(true)
+      setIsTodosLoading(false)
+    });
+
+    
   }, []);
 
   return (
