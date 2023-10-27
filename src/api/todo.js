@@ -9,5 +9,10 @@ export const getTodos = () => {
 
         return response.json();
       })
-      
+}
+
+export const deleteTodo = (id) => { // Удаляем id в бекенде
+  fetch(`${BASE_URL}/todos/${id}`, {
+      method: 'DELETE',
+  });
 }

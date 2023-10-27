@@ -11,6 +11,8 @@ import {
 } from 'react'
 import { getTodos } from './api/todo';
 import { getNormalizedTodos } from './utils/get-normalized-todos';
+import Todo from './components/Todo/Todo';
+import { deleteTodo } from './api/todo';
 
 // const mockTodos = [ // 1 Создаем изначальную структуру из которой будем отталкиваться
 //   {
@@ -67,6 +69,12 @@ const App = () => {
     
   }, []);
 
+  const handleDeleteTodoBtnClick = (id) => { // В функцию будем передавать id todo
+    console.log(id)
+    setTodosIds(todosIds.filter(todoId => todoId !== id)) // Удаляем id по нажатию
+    deleteTodo(id); // Процесс удаления на бэкенде
+  }
+
   return (
     <div>
       <h1>Список задач</h1>
@@ -76,7 +84,11 @@ const App = () => {
       { isTodosLoading && <p>Загружаем список задач</p> }
 
       { todosIds && todosIds.map(id => ( // 3 Делаем отрисовку через map
-        <p key={id}>{todosById[id].title}</p>
+        <Todo
+          key={id}
+          todo={todosById[id]}
+          onDeleteBtnClick={() => handleDeleteTodoBtnClick(id)} />
+
       ))}
     </div>
   )
