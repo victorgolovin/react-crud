@@ -5,15 +5,12 @@
 // 3. Редактирование задачи (Update)
 // 4. Удаление задачи (Delete)
 
-import { 
-  useState,
-  useEffect 
-} from 'react'
-import { getTodos, updateTodo } from './api/todo';
-import { getNormalizedTodos } from './utils/get-normalized-todos';
-import Todo from './components/Todo/Todo';
-import { deleteTodo } from './api/todo';
-
+import { useState, useEffect } from "react";
+import { addTodo, getTodos, updateTodo } from "./api/todo";
+import { getNormalizedTodos } from "./utils/get-normalized-todos";
+import Todo from "./components/Todo/Todo";
+import { deleteTodo } from "./api/todo";
+import { v4 as uuidv4 } from 'uuid';
 
 // const mockTodos = [ // 1 Создаем изначальную структуру из которой будем отталкиваться
 //   {
@@ -45,69 +42,102 @@ import { deleteTodo } from './api/todo';
 const App = () => {
   const [todosIds, setTodosIds] = useState(null); // 2 передаем mockTodos в useState чтобы с ним работать
   const [todosById, setTodosById] = useState({});
-  const [isTodosLoading, setIsTodosLoading] = useState(false)
-  const [isTodosLoadingError, setIsTodosLoadingError] = useState(false)
-
+  const [isTodosLoading, setIsTodosLoading] = useState(false);
+  const [isTodosLoadingError, setIsTodosLoadingError] = useState(false);
+  const [todoTitle, setTodoTitle] = useState("");
 
   useEffect(() => {
-    setIsTodosLoadingError(false)
-    setIsTodosLoading(true)
+    setIsTodosLoadingError(false);
+    setIsTodosLoading(true);
 
     getTodos()
-    .then(todos => { // Определяем что должно приходить в данном случае todos
-      const [ids, byIds] = getNormalizedTodos(todos) // Данная логика функции импортирована из get-normalize-todos 
+      .then((todos) => { // Определяем что должно приходить в данном случае todos
+        const [ids, byIds] = getNormalizedTodos(todos); // Данная логика функции импортирована из get-normalize-todos
 
-      setIsTodosLoading(false);
-      setTodosIds(ids);
-      setTodosById(byIds);
-    })
+        setIsTodosLoading(false);
+        setTodosIds(ids);
+        setTodosById(byIds);
+      })
 
-    .catch(() => {
-      setIsTodosLoadingError(true)
-      setIsTodosLoading(false)
-    });
-
-    
+      .catch(() => {
+        setIsTodosLoadingError(true);
+        setIsTodosLoading(false);
+      });
   }, []);
 
   const handleDeleteTodo = (id) => { // В функцию будем передавать id todo
-    console.log(id)
-    setTodosIds(todosIds.filter(todoId => todoId !== id)) // Удаляем id по нажатию
+    console.log(id);
+    setTodosIds(todosIds.filter((todoId) => todoId !== id)); // Удаляем id по нажатию
     deleteTodo(id); // Процесс удаления на бэкенде
-  }
+  };
 
   const handleToggleTodo = (id) => { // В handleToggleTodo мы получаем (id)
-    const todo = {  // Формируем новую todo в которой мы меняем поле completed
+    const todo = { // Формируем новую todo в которой мы меняем поле completed
       ...todosById[id],
-        completed: !todosById[id].completed
-    }
+      completed: !todosById[id].completed,
+    };
 
     setTodosById({ // нужно поменять поле todosById
       ...todosById, // берем предыдущий обьект
-      [id]: todo
-    })
+      [id]: todo,
+    });
 
-    updateTodo(todo) // Обновляем нашу ip
-  }
+    updateTodo(todo); // Обновляем нашу ip
+  };
+
+  const handleInputTodoTitleChange = (event) => { // handleInputTodoTitleChange принимает event который мы создали в инпуте ниже
+    setTodoTitle(event.target.value);
+  };
+
+  const handleAddTodoBtnClick = () => {
+    const id = uuidv4();
+    const todo = {
+      id,
+      title: todoTitle,
+      completed: false,
+    };
+
+    setTodosById({
+      ...todosById,
+      [todo.id]: todo
+    });
+
+    setTodosIds([todo.id, ...todosIds])
+
+    addTodo(todo)
+  };
 
   return (
     <div>
       <h1>Список задач</h1>
 
-      { isTodosLoadingError && <p>Произошла ошибка</p> }
+      {isTodosLoadingError && <p>Произошла ошибка</p>}
 
-      { isTodosLoading && <p>Загружаем список задач</p> }
+      {isTodosLoading && <p>Загружаем список задач</p>}
 
-      { todosIds && todosIds.map(id => ( // 3 Делаем отрисовку через map
-        <Todo
-          key={id}
-          todo={todosById[id]}
-          onDelete={() => handleDeleteTodo(id)}
-          onToggle={() => handleToggleTodo(id)} />  // При onToggle запускается функция () => в которую мы передаем handleToggleTodo и предаем (id)
+      <input
+        type="text"
+        value={todoTitle}
+        onChange={(event) => handleInputTodoTitleChange(event)}
+      />
 
-      ))}
+      <button onClick={handleAddTodoBtnClick}>Добовление задачи</button>
+
+      {todosIds &&
+        todosIds.map(
+          (
+            id // 3 Делаем отрисовку через map
+          ) => (
+            <Todo
+              key={id}
+              todo={todosById[id]}
+              onDelete={() => handleDeleteTodo(id)}
+              onToggle={() => handleToggleTodo(id)}
+            /> // При onToggle запускается функция () => в которую мы передаем handleToggleTodo и предаем (id)
+          )
+        )}
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default App;
