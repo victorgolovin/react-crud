@@ -16,3 +16,13 @@ export const deleteTodo = (id) => { // Удаляем id в бекенде
       method: 'DELETE',
   });
 }
+
+export const updateTodo = (todo) => {
+  fetch(`${BASE_URL}/todos/${todo.id}`, {
+      method: 'PUT',
+      body: JSON.stringify(todo),
+      headers: {
+        'Content-type': 'application/json; charset=UTF-8',
+      },
+  })
+}

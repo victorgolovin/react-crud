@@ -9,10 +9,11 @@ import {
   useState,
   useEffect 
 } from 'react'
-import { getTodos } from './api/todo';
+import { getTodos, updateTodo } from './api/todo';
 import { getNormalizedTodos } from './utils/get-normalized-todos';
 import Todo from './components/Todo/Todo';
 import { deleteTodo } from './api/todo';
+
 
 // const mockTodos = [ // 1 Создаем изначальную структуру из которой будем отталкиваться
 //   {
@@ -69,10 +70,24 @@ const App = () => {
     
   }, []);
 
-  const handleDeleteTodoBtnClick = (id) => { // В функцию будем передавать id todo
+  const handleDeleteTodo = (id) => { // В функцию будем передавать id todo
     console.log(id)
     setTodosIds(todosIds.filter(todoId => todoId !== id)) // Удаляем id по нажатию
     deleteTodo(id); // Процесс удаления на бэкенде
+  }
+
+  const handleToggleTodo = (id) => { // В handleToggleTodo мы получаем (id)
+    const todo = {  // Формируем новую todo в которой мы меняем поле completed
+      ...todosById[id],
+        completed: !todosById[id].completed
+    }
+
+    setTodosById({ // нужно поменять поле todosById
+      ...todosById, // берем предыдущий обьект
+      [id]: todo
+    })
+
+    updateTodo(todo) // Обновляем нашу ip
   }
 
   return (
@@ -87,7 +102,8 @@ const App = () => {
         <Todo
           key={id}
           todo={todosById[id]}
-          onDeleteBtnClick={() => handleDeleteTodoBtnClick(id)} />
+          onDelete={() => handleDeleteTodo(id)}
+          onToggle={() => handleToggleTodo(id)} />  // При onToggle запускается функция () => в которую мы передаем handleToggleTodo и предаем (id)
 
       ))}
     </div>
